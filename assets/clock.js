@@ -1,6 +1,8 @@
 (function (root) {
   "use strict";
 
+  var SUCCESS_DELAY = 5000;
+
   function normaliseHour(hour) {
     var value = hour % 12;
     if (value < 0) {
@@ -80,6 +82,22 @@
     return slot * 5;
   }
 
+  function adjustTimeByMinutes(time, direction) {
+    var minute = adjustMinute(time.minute, direction);
+    var hour = time.hour;
+
+    if (direction > 0 && minute < time.minute) {
+      hour = adjustHour(hour, 1);
+    } else if (direction < 0 && minute > time.minute) {
+      hour = adjustHour(hour, -1);
+    }
+
+    return {
+      hour: hour,
+      minute: minute
+    };
+  }
+
   function startingTime(target) {
     return {
       hour: adjustHour(target.hour, 1),
@@ -101,8 +119,10 @@
     randomTime: randomTime,
     adjustHour: adjustHour,
     adjustMinute: adjustMinute,
+    adjustTimeByMinutes: adjustTimeByMinutes,
     startingTime: startingTime,
-    timesMatch: timesMatch
+    timesMatch: timesMatch,
+    successDelay: SUCCESS_DELAY
   };
 
   if (typeof module !== "undefined" && module.exports) {
@@ -116,11 +136,9 @@
   root.ClockModel = model;
 
   function startTrainer() {
-    var clock = root.document.getElementById("clock");
     var clockDescription = root.document.getElementById("clock-description");
     var hourHand = root.document.getElementById("hour-hand");
     var minuteHand = root.document.getElementById("minute-hand");
-    var modeLabel = root.document.getElementById("mode-label");
     var prompt = root.document.getElementById("prompt");
     var targetPanel = root.document.getElementById("target");
     var targetTime = root.document.getElementById("target-time");
@@ -128,13 +146,12 @@
     var hourControls = root.document.getElementById("hour-controls");
     var minuteControls = root.document.getElementById("minute-controls");
     var checkButton = root.document.getElementById("check");
+    var successPanel = root.document.getElementById("success");
     var feedback = root.document.getElementById("feedback");
-    var nextButton = root.document.getElementById("next");
-    var hintRow = root.document.getElementById("hint-row");
-    var hintButton = root.document.getElementById("hint");
     var mode = "read";
     var target = null;
     var setting = null;
+    var advanceTimer = null;
 
     function setHand(hand, angle) {
       hand.setAttribute("transform", "rotate(" + angle + " 160 160)");
@@ -146,8 +163,17 @@
     }
 
     function setFeedback(message, successful) {
-      feedback.textContent = message;
-      feedback.setAttribute("class", successful ? "feedback feedback--success" : "feedback");
+      if (successful) {
+        feedback.textContent = "";
+        successPanel.textContent = message;
+        successPanel.setAttribute("class", "success-panel success-panel--active");
+        successPanel.hidden = false;
+      } else {
+        successPanel.textContent = "";
+        successPanel.setAttribute("class", "success-panel");
+        successPanel.hidden = true;
+        feedback.textContent = message;
+      }
     }
 
     function setButtonsDisabled(container, disabled) {
@@ -163,10 +189,19 @@
       setButtonsDisabled(minuteControls, disabled);
     }
 
-    function resetHint() {
-      clock.setAttribute("class", "clock");
-      hintButton.setAttribute("aria-pressed", "false");
-      hintButton.textContent = "Pokaż minuty";
+    function clearAdvanceTimer() {
+      if (advanceTimer !== null) {
+        root.clearTimeout(advanceTimer);
+        advanceTimer = null;
+      }
+    }
+
+    function scheduleNextMode() {
+      clearAdvanceTimer();
+      advanceTimer = root.setTimeout(function () {
+        advanceTimer = null;
+        showNextMode();
+      }, SUCCESS_DELAY);
     }
 
     function renderReadExercise() {
@@ -174,13 +209,12 @@
       var buttons;
       var index;
 
+      clearAdvanceTimer();
       mode = "read";
       target = randomTime(Math.random);
       setting = null;
       renderHands(target);
-      resetHint();
 
-      modeLabel.textContent = "TRYB 1 z 2 · ODCZYTAJ";
       prompt.textContent = "Którą godzinę pokazuje zegar?";
       clockDescription.textContent = "Odczytaj położenie krótkiej i długiej wskazówki.";
       targetPanel.hidden = true;
@@ -188,9 +222,6 @@
       minuteControls.hidden = true;
       checkButton.hidden = true;
       answers.hidden = false;
-      hintRow.hidden = false;
-      nextButton.hidden = true;
-      nextButton.textContent = "Ustaw wskazówki";
       setFeedback("", false);
 
       choices = shuffle(answerChoices(target.hour, target.minute), Math.random);
@@ -207,25 +238,21 @@
     }
 
     function renderSetExercise() {
+      clearAdvanceTimer();
       mode = "set";
       target = randomTime(Math.random);
       setting = startingTime(target);
-      resetHint();
       renderSetting();
 
-      modeLabel.textContent = "TRYB 2 z 2 · USTAW";
       prompt.textContent = "Ustaw wskazówki tak, aby pasowały do godziny:";
       targetTime.textContent = formatTime(target.hour, target.minute);
       clockDescription.textContent = "Zegar, którego wskazówki ustawiasz przyciskami po bokach.";
       targetPanel.hidden = false;
       answers.hidden = true;
-      hintRow.hidden = true;
       hourControls.hidden = false;
       minuteControls.hidden = false;
       checkButton.hidden = false;
       checkButton.disabled = false;
-      nextButton.hidden = true;
-      nextButton.textContent = "Odczytaj kolejny zegar";
       setHandControlsDisabled(false);
       setFeedback("", false);
     }
@@ -245,8 +272,8 @@
       if (selected === correct) {
         setFeedback("Dobrze! Zegar pokazuje " + correct + ".", true);
         setButtonsDisabled(answers, true);
-        nextButton.hidden = false;
-        nextButton.focus();
+        answers.hidden = true;
+        scheduleNextMode();
       } else {
         setFeedback("Spróbuj jeszcze raz. Najpierw spójrz na długą wskazówkę.", false);
       }
@@ -266,7 +293,7 @@
       if (unit === "hour") {
         setting.hour = adjustHour(setting.hour, direction);
       } else if (unit === "minute") {
-        setting.minute = adjustMinute(setting.minute, direction);
+        setting = adjustTimeByMinutes(setting, direction);
       } else {
         return;
       }
@@ -284,8 +311,8 @@
         setFeedback("Dobrze! Wskazówki pokazują " + formatTime(target.hour, target.minute) + ".", true);
         setHandControlsDisabled(true);
         checkButton.disabled = true;
-        nextButton.hidden = false;
-        nextButton.focus();
+        checkButton.hidden = true;
+        scheduleNextMode();
       } else {
         setFeedback("Jeszcze nie. Porównaj godziny i minuty, potem popraw wskazówki.", false);
       }
@@ -299,23 +326,10 @@
       }
     }
 
-    function toggleHint() {
-      var shown = clock.getAttribute("class").indexOf("clock--hint") !== -1;
-      if (shown) {
-        resetHint();
-      } else {
-        clock.setAttribute("class", "clock clock--hint");
-        hintButton.setAttribute("aria-pressed", "true");
-        hintButton.textContent = "Pokaż godziny";
-      }
-    }
-
     answers.addEventListener("click", checkReadAnswer, false);
     hourControls.addEventListener("click", adjustHands, false);
     minuteControls.addEventListener("click", adjustHands, false);
     checkButton.addEventListener("click", checkSetting, false);
-    nextButton.addEventListener("click", showNextMode, false);
-    hintButton.addEventListener("click", toggleHint, false);
     renderReadExercise();
   }
 

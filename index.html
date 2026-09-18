@@ -16,8 +16,7 @@
     </header>
 
     <div class="task-head">
-      <p id="mode-label" class="mode-label">TRYB 1 z 2 · ODCZYTAJ</p>
-      <p id="prompt" class="prompt">Którą godzinę pokazuje zegar?</p>
+      <h2 id="prompt" class="prompt">Którą godzinę pokazuje zegar?</h2>
       <p id="target" class="target" hidden>
         Ustaw godzinę <strong id="target-time">00:00</strong>
       </p>
@@ -86,18 +85,6 @@
           <text class="clock__number" x="64" y="104">10</text>
           <text class="clock__number" x="104" y="64">11</text>
 
-          <text class="clock__minute-label" x="160" y="48">00</text>
-          <text class="clock__minute-label" x="216" y="64">05</text>
-          <text class="clock__minute-label" x="256" y="104">10</text>
-          <text class="clock__minute-label" x="272" y="160">15</text>
-          <text class="clock__minute-label" x="256" y="216">20</text>
-          <text class="clock__minute-label" x="216" y="256">25</text>
-          <text class="clock__minute-label" x="160" y="272">30</text>
-          <text class="clock__minute-label" x="104" y="256">35</text>
-          <text class="clock__minute-label" x="64" y="216">40</text>
-          <text class="clock__minute-label" x="48" y="160">45</text>
-          <text class="clock__minute-label" x="64" y="104">50</text>
-          <text class="clock__minute-label" x="104" y="64">55</text>
         </g>
 
         <line id="hour-hand" class="clock__hand clock__hand--hour" x1="160" y1="173" x2="160" y2="92"></line>
@@ -113,21 +100,19 @@
       </div>
     </div>
 
-    <div id="hint-row" class="hint-row">
-      <button id="hint" class="hint-button" type="button" aria-pressed="false">Pokaż minuty</button>
+    <div class="interaction-slot">
+      <fieldset id="answers" class="answers">
+        <legend class="answers__legend">Wybierz godzinę</legend>
+        <button class="answer" type="button">00:00</button>
+        <button class="answer" type="button">00:00</button>
+        <button class="answer" type="button">00:00</button>
+      </fieldset>
+
+      <button id="check" class="check" type="button" hidden>Sprawdź</button>
+      <p id="success" class="success-panel" aria-live="polite" hidden></p>
     </div>
 
-    <fieldset id="answers" class="answers">
-      <legend class="answers__legend">Wybierz godzinę</legend>
-      <button class="answer" type="button">00:00</button>
-      <button class="answer" type="button">00:00</button>
-      <button class="answer" type="button">00:00</button>
-    </fieldset>
-
-    <button id="check" class="check" type="button" hidden>Sprawdź</button>
-
     <p id="feedback" class="feedback" aria-live="polite"></p>
-    <button id="next" class="next" type="button" hidden>Ustaw wskazówki</button>
 
     <noscript><p class="noscript">Ta strona potrzebuje włączonego JavaScriptu, aby losować zadania.</p></noscript>
   </main>

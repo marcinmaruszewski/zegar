@@ -52,6 +52,46 @@ test("minute controls move in five-minute steps and wrap", function () {
   assert.equal(clock.adjustMinute(25, 1), 30);
 });
 
+test("increasing minutes advances both hands smoothly through the next hour", function () {
+  var beforeWrap = clock.adjustTimeByMinutes({ hour: 11, minute: 50 }, 1);
+  var afterWrap = clock.adjustTimeByMinutes(beforeWrap, 1);
+  var hourTravel = (
+    clock.hourAngle(afterWrap.hour, afterWrap.minute) -
+    clock.hourAngle(beforeWrap.hour, beforeWrap.minute) +
+    360
+  ) % 360;
+  var minuteTravel = (
+    clock.minuteAngle(afterWrap.minute) -
+    clock.minuteAngle(beforeWrap.minute) +
+    360
+  ) % 360;
+
+  assert.deepEqual(beforeWrap, { hour: 11, minute: 55 });
+  assert.deepEqual(afterWrap, { hour: 12, minute: 0 });
+  assert.equal(minuteTravel, 30);
+  assert.equal(hourTravel, 2.5);
+});
+
+test("decreasing minutes moves both hands smoothly through the previous hour", function () {
+  var atHour = clock.adjustTimeByMinutes({ hour: 12, minute: 5 }, -1);
+  var beforeHour = clock.adjustTimeByMinutes(atHour, -1);
+  var hourTravel = (
+    clock.hourAngle(atHour.hour, atHour.minute) -
+    clock.hourAngle(beforeHour.hour, beforeHour.minute) +
+    360
+  ) % 360;
+  var minuteTravel = (
+    clock.minuteAngle(atHour.minute) -
+    clock.minuteAngle(beforeHour.minute) +
+    360
+  ) % 360;
+
+  assert.deepEqual(atHour, { hour: 12, minute: 0 });
+  assert.deepEqual(beforeHour, { hour: 11, minute: 55 });
+  assert.equal(minuteTravel, 30);
+  assert.equal(hourTravel, 2.5);
+});
+
 test("the setting exercise starts at a different hour and minute", function () {
   assert.deepEqual(clock.startingTime({ hour: 12, minute: 50 }), {
     hour: 1,
@@ -72,4 +112,8 @@ test("matching a time requires both hands to be correct", function () {
     clock.timesMatch({ hour: 7, minute: 35 }, { hour: 7, minute: 40 }),
     false
   );
+});
+
+test("a successful answer stays visible for five seconds", function () {
+  assert.equal(clock.successDelay, 5000);
 });

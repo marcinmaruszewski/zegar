@@ -125,9 +125,8 @@
     var targetPanel = root.document.getElementById("target");
     var targetTime = root.document.getElementById("target-time");
     var answers = root.document.getElementById("answers");
-    var controls = root.document.getElementById("controls");
-    var hourValue = root.document.getElementById("hour-value");
-    var minuteValue = root.document.getElementById("minute-value");
+    var hourControls = root.document.getElementById("hour-controls");
+    var minuteControls = root.document.getElementById("minute-controls");
     var checkButton = root.document.getElementById("check");
     var feedback = root.document.getElementById("feedback");
     var nextButton = root.document.getElementById("next");
@@ -159,6 +158,11 @@
       }
     }
 
+    function setHandControlsDisabled(disabled) {
+      setButtonsDisabled(hourControls, disabled);
+      setButtonsDisabled(minuteControls, disabled);
+    }
+
     function resetHint() {
       clock.setAttribute("class", "clock");
       hintButton.setAttribute("aria-pressed", "false");
@@ -180,7 +184,8 @@
       prompt.textContent = "Którą godzinę pokazuje zegar?";
       clockDescription.textContent = "Odczytaj położenie krótkiej i długiej wskazówki.";
       targetPanel.hidden = true;
-      controls.hidden = true;
+      hourControls.hidden = true;
+      minuteControls.hidden = true;
       checkButton.hidden = true;
       answers.hidden = false;
       hintRow.hidden = false;
@@ -197,10 +202,8 @@
       setButtonsDisabled(answers, false);
     }
 
-    function renderSettingValues() {
+    function renderSetting() {
       renderHands(setting);
-      hourValue.textContent = pad2(setting.hour);
-      minuteValue.textContent = pad2(setting.minute);
     }
 
     function renderSetExercise() {
@@ -208,21 +211,22 @@
       target = randomTime(Math.random);
       setting = startingTime(target);
       resetHint();
-      renderSettingValues();
+      renderSetting();
 
       modeLabel.textContent = "TRYB 2 z 2 · USTAW";
       prompt.textContent = "Ustaw wskazówki tak, aby pasowały do godziny:";
       targetTime.textContent = formatTime(target.hour, target.minute);
-      clockDescription.textContent = "Zegar, którego wskazówki ustawiasz przyciskami poniżej.";
+      clockDescription.textContent = "Zegar, którego wskazówki ustawiasz przyciskami po bokach.";
       targetPanel.hidden = false;
       answers.hidden = true;
       hintRow.hidden = true;
-      controls.hidden = false;
+      hourControls.hidden = false;
+      minuteControls.hidden = false;
       checkButton.hidden = false;
       checkButton.disabled = false;
       nextButton.hidden = true;
       nextButton.textContent = "Odczytaj kolejny zegar";
-      setButtonsDisabled(controls, false);
+      setHandControlsDisabled(false);
       setFeedback("", false);
     }
 
@@ -267,7 +271,7 @@
         return;
       }
 
-      renderSettingValues();
+      renderSetting();
       setFeedback("", false);
     }
 
@@ -278,7 +282,7 @@
 
       if (timesMatch(setting, target)) {
         setFeedback("Dobrze! Wskazówki pokazują " + formatTime(target.hour, target.minute) + ".", true);
-        setButtonsDisabled(controls, true);
+        setHandControlsDisabled(true);
         checkButton.disabled = true;
         nextButton.hidden = false;
         nextButton.focus();
@@ -307,7 +311,8 @@
     }
 
     answers.addEventListener("click", checkReadAnswer, false);
-    controls.addEventListener("click", adjustHands, false);
+    hourControls.addEventListener("click", adjustHands, false);
+    minuteControls.addEventListener("click", adjustHands, false);
     checkButton.addEventListener("click", checkSetting, false);
     nextButton.addEventListener("click", showNextMode, false);
     hintButton.addEventListener("click", toggleHint, false);

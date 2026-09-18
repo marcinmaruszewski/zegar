@@ -118,7 +118,10 @@ const nextState = await evaluate(`(function () {
     feedback: document.getElementById("feedback").textContent,
     nextHidden: document.getElementById("next").hidden,
     answersHidden: document.getElementById("answers").hidden,
-    controlsVisible: !document.getElementById("controls").hidden,
+    hourControlsVisible: !document.getElementById("hour-controls").hidden,
+    minuteControlsVisible: !document.getElementById("minute-controls").hidden,
+    controlOrder: Array.from(document.querySelectorAll(".adjust")).map(function (button) { return button.getAttribute("data-direction"); }),
+    settingReadouts: document.querySelectorAll("#hour-value, #minute-value").length,
     target: document.getElementById("target-time").textContent
   });
 }())`);
@@ -127,7 +130,10 @@ assert.equal(settingState.mode, "TRYB 2 z 2 · USTAW");
 assert.equal(settingState.feedback, "");
 assert.equal(settingState.nextHidden, true);
 assert.equal(settingState.answersHidden, true);
-assert.equal(settingState.controlsVisible, true);
+assert.equal(settingState.hourControlsVisible, true);
+assert.equal(settingState.minuteControlsVisible, true);
+assert.deepEqual(settingState.controlOrder, ["1", "-1", "1", "-1"]);
+assert.equal(settingState.settingReadouts, 0);
 assert.match(settingState.target, /^\d\d:\d\d$/);
 
 const wrongSetting = await evaluate(`(function () {
@@ -158,13 +164,15 @@ const returnedState = await evaluate(`(function () {
   return JSON.stringify({
     mode: document.getElementById("mode-label").textContent,
     answersVisible: !document.getElementById("answers").hidden,
-    controlsHidden: document.getElementById("controls").hidden
+    hourControlsHidden: document.getElementById("hour-controls").hidden,
+    minuteControlsHidden: document.getElementById("minute-controls").hidden
   });
 }())`);
 assert.deepEqual(JSON.parse(returnedState), {
   mode: "TRYB 1 z 2 · ODCZYTAJ",
   answersVisible: true,
-  controlsHidden: true
+  hourControlsHidden: true,
+  minuteControlsHidden: true
 });
 
 socket.close();

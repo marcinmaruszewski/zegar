@@ -148,10 +148,30 @@
     var checkButton = root.document.getElementById("check");
     var successPanel = root.document.getElementById("success");
     var feedback = root.document.getElementById("feedback");
+    var statsCorrect = root.document.getElementById("stats-correct");
+    var statsErrors = root.document.getElementById("stats-errors");
+    var statsRatio = root.document.getElementById("stats-ratio");
     var mode = "read";
     var target = null;
     var setting = null;
     var advanceTimer = null;
+    var correctCount = 0;
+    var errorCount = 0;
+
+    function recordAttempt(correct) {
+      var attempts;
+
+      if (correct) {
+        correctCount += 1;
+      } else {
+        errorCount += 1;
+      }
+      attempts = correctCount + errorCount;
+
+      statsCorrect.textContent = correctCount;
+      statsErrors.textContent = errorCount;
+      statsRatio.textContent = Math.round((correctCount / attempts) * 100) + "%";
+    }
 
     function setHand(hand, angle) {
       hand.setAttribute("transform", "rotate(" + angle + " 160 160)");
@@ -270,11 +290,13 @@
       correct = formatTime(target.hour, target.minute);
 
       if (selected === correct) {
+        recordAttempt(true);
         setFeedback("Dobrze! Zegar pokazuje " + correct + ".", true);
         setButtonsDisabled(answers, true);
         answers.hidden = true;
         scheduleNextMode();
       } else {
+        recordAttempt(false);
         setFeedback("Spróbuj jeszcze raz. Najpierw spójrz na długą wskazówkę.", false);
       }
     }
@@ -308,12 +330,14 @@
       }
 
       if (timesMatch(setting, target)) {
+        recordAttempt(true);
         setFeedback("Dobrze! Wskazówki pokazują " + formatTime(target.hour, target.minute) + ".", true);
         setHandControlsDisabled(true);
         checkButton.disabled = true;
         checkButton.hidden = true;
         scheduleNextMode();
       } else {
+        recordAttempt(false);
         setFeedback("Jeszcze nie. Porównaj godziny i minuty, potem popraw wskazówki.", false);
       }
     }

@@ -297,6 +297,14 @@ button:disabled {
   animation: success-fill 5s steps(5, end) forwards;
 }
 
+.stats {
+  margin: 0;
+  color: var(--muted);
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: bold;
+}
+
 .noscript {
   margin: 1rem 0;
   padding: 1rem;

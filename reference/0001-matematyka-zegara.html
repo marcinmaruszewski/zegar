@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ściąga: matematyka zegara</title>
+  <link rel="stylesheet" href="../assets/site.css">
+  <link rel="stylesheet" href="../assets/course.css">
+</head>
+<body>
+  <main class="lesson">
+    <p class="lesson__kicker">Ściąga 1 · do druku</p>
+    <h1>Matematyka zegara</h1>
+
+    <h2>Długa wskazówka — minuty</h2>
+    <p class="equation">minuteAngle(m) = m × 6°</p>
+    <p>Bo 360° ÷ 60 minut = 6° na minutę.</p>
+
+    <h2>Krótka wskazówka — godziny</h2>
+    <p class="equation">hourAngle(h, m) = (h mod 12) × 30° + m × 0,5°</p>
+    <p>Bo 360° ÷ 12 godzin = 30° na godzinę, a 30° ÷ 60 minut = 0,5° na minutę.</p>
+
+    <h2>Punkty kontrolne</h2>
+    <table>
+      <thead><tr><th>Czas</th><th>Minutowa</th><th>Godzinowa</th></tr></thead>
+      <tbody>
+        <tr><td>12:00</td><td>0°</td><td>0°</td></tr>
+        <tr><td>03:00</td><td>0°</td><td>90°</td></tr>
+        <tr><td>03:30</td><td>180°</td><td>105°</td></tr>
+        <tr><td>04:20</td><td>120°</td><td>130°</td></tr>
+        <tr><td>09:45</td><td>270°</td><td>292,5°</td></tr>
+      </tbody>
+    </table>
+
+    <h2>W kodzie</h2>
+    <pre class="code"><code>function minuteAngle(minute) {
+  return minute * 6;
+}
+
+function hourAngle(hour, minute) {
+  return (hour % 12) * 30 + minute * 0.5;
+}</code></pre>
+
+    <nav class="lesson__actions" aria-label="Dalsze kroki">
+      <a class="lesson__link" href="../lessons/0001-jak-obrocic-wskazowki.html">Wróć do lekcji 1</a>
+      <a class="lesson__link lesson__link--primary" href="../index.html">Otwórz aplikację</a>
+    </nav>
+  </main>
+</body>
+</html>

@@ -64,13 +64,15 @@ await command("Emulation.setDeviceMetricsOverride", {
 
 const initial = await evaluate(`JSON.stringify({
   title: document.title,
+  mode: document.getElementById("mode-label").textContent,
   answers: Array.from(document.querySelectorAll(".answer")).map(function (button) { return button.textContent; }),
   fitsWidth: document.documentElement.scrollWidth <= window.innerWidth,
   viewport: [window.innerWidth, window.innerHeight]
 })`);
 const initialState = JSON.parse(initial);
 
-assert.equal(initialState.title, "Która godzina?");
+assert.equal(initialState.title, "Poćwicz zegar");
+assert.equal(initialState.mode, "TRYB 1 z 2 · ODCZYTAJ");
 assert.equal(initialState.answers.length, 3);
 assert.equal(new Set(initialState.answers).size, 3);
 assert.equal(initialState.answers.every(function (answer) { return answer.length === 5; }), true);
@@ -94,7 +96,7 @@ const answerState = await evaluate(`(function () {
   var index;
   for (index = 0; index < buttons.length; index += 1) {
     buttons[index].click();
-    if (document.getElementById("feedback").textContent.indexOf("Tak!") === 0) {
+    if (document.getElementById("feedback").textContent.indexOf("Dobrze!") === 0) {
       break;
     }
   }
@@ -105,22 +107,64 @@ const answerState = await evaluate(`(function () {
   });
 }())`);
 const answered = JSON.parse(answerState);
-assert.match(answered.feedback, /^Tak! To \d\d:\d\d\.$/);
+assert.match(answered.feedback, /^Dobrze! Zegar pokazuje \d\d:\d\d\.$/);
 assert.equal(answered.nextVisible, true);
 assert.equal(answered.answersDisabled, true);
 
 const nextState = await evaluate(`(function () {
   document.getElementById("next").click();
   return JSON.stringify({
+    mode: document.getElementById("mode-label").textContent,
     feedback: document.getElementById("feedback").textContent,
     nextHidden: document.getElementById("next").hidden,
-    answersEnabled: Array.from(document.querySelectorAll(".answer")).every(function (button) { return !button.disabled; })
+    answersHidden: document.getElementById("answers").hidden,
+    controlsVisible: !document.getElementById("controls").hidden,
+    target: document.getElementById("target-time").textContent
   });
 }())`);
-assert.deepEqual(JSON.parse(nextState), {
-  feedback: "",
-  nextHidden: true,
-  answersEnabled: true
+const settingState = JSON.parse(nextState);
+assert.equal(settingState.mode, "TRYB 2 z 2 · USTAW");
+assert.equal(settingState.feedback, "");
+assert.equal(settingState.nextHidden, true);
+assert.equal(settingState.answersHidden, true);
+assert.equal(settingState.controlsVisible, true);
+assert.match(settingState.target, /^\d\d:\d\d$/);
+
+const wrongSetting = await evaluate(`(function () {
+  document.getElementById("check").click();
+  return document.getElementById("feedback").textContent;
+}())`);
+assert.match(wrongSetting, /^Jeszcze nie\./);
+
+const correctSetting = await evaluate(`(function () {
+  document.querySelector('[data-unit="hour"][data-direction="-1"]').click();
+  document.querySelector('[data-unit="minute"][data-direction="-1"]').click();
+  document.querySelector('[data-unit="minute"][data-direction="-1"]').click();
+  document.querySelector('[data-unit="minute"][data-direction="-1"]').click();
+  document.getElementById("check").click();
+  return JSON.stringify({
+    feedback: document.getElementById("feedback").textContent,
+    nextVisible: !document.getElementById("next").hidden,
+    controlsDisabled: Array.from(document.querySelectorAll(".adjust")).every(function (button) { return button.disabled; })
+  });
+}())`);
+const settingResult = JSON.parse(correctSetting);
+assert.match(settingResult.feedback, /^Dobrze! Wskazówki pokazują \d\d:\d\d\.$/);
+assert.equal(settingResult.nextVisible, true);
+assert.equal(settingResult.controlsDisabled, true);
+
+const returnedState = await evaluate(`(function () {
+  document.getElementById("next").click();
+  return JSON.stringify({
+    mode: document.getElementById("mode-label").textContent,
+    answersVisible: !document.getElementById("answers").hidden,
+    controlsHidden: document.getElementById("controls").hidden
+  });
+}())`);
+assert.deepEqual(JSON.parse(returnedState), {
+  mode: "TRYB 1 z 2 · ODCZYTAJ",
+  answersVisible: true,
+  controlsHidden: true
 });
 
 socket.close();

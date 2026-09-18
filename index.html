@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#ffffff">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <title>Poćwicz zegar</title>
   <link rel="stylesheet" href="assets/site.css">
 </head>
@@ -22,8 +23,15 @@
       </p>
     </div>
 
-    <div class="clock-wrap">
-      <svg id="clock" class="clock" viewBox="0 0 320 320" xmlns:xlink="http://www.w3.org/1999/xlink" role="img" aria-labelledby="clock-title clock-description">
+    <div class="clock-stage">
+      <div id="hour-controls" class="hand-controls hand-controls--hours" role="group" aria-label="Ustawianie godzin" hidden>
+        <button class="adjust" type="button" data-unit="hour" data-direction="1" aria-label="Przesuń wskazówkę godzinową do przodu">+</button>
+        <p class="hand-controls__label">GODZINY</p>
+        <button class="adjust" type="button" data-unit="hour" data-direction="-1" aria-label="Cofnij wskazówkę godzinową">−</button>
+      </div>
+
+      <div class="clock-wrap">
+        <svg id="clock" class="clock" viewBox="0 0 320 320" xmlns:xlink="http://www.w3.org/1999/xlink" role="img" aria-labelledby="clock-title clock-description">
         <title id="clock-title">Zegar analogowy</title>
         <desc id="clock-description">Krótka wskazówka pokazuje godzinę, a długa minuty.</desc>
         <circle class="clock__face" cx="160" cy="160" r="145"></circle>
@@ -95,7 +103,14 @@
         <line id="hour-hand" class="clock__hand clock__hand--hour" x1="160" y1="173" x2="160" y2="92"></line>
         <line id="minute-hand" class="clock__hand clock__hand--minute" x1="160" y1="178" x2="160" y2="52"></line>
         <circle class="clock__pin" cx="160" cy="160" r="8"></circle>
-      </svg>
+        </svg>
+      </div>
+
+      <div id="minute-controls" class="hand-controls hand-controls--minutes" role="group" aria-label="Ustawianie minut" hidden>
+        <button class="adjust" type="button" data-unit="minute" data-direction="1" aria-label="Przesuń wskazówkę minutową o 5 minut">+</button>
+        <p class="hand-controls__label">MINUTY</p>
+        <button class="adjust" type="button" data-unit="minute" data-direction="-1" aria-label="Cofnij wskazówkę minutową o 5 minut">−</button>
+      </div>
     </div>
 
     <div id="hint-row" class="hint-row">
@@ -108,25 +123,6 @@
       <button class="answer" type="button">00:00</button>
       <button class="answer" type="button">00:00</button>
     </fieldset>
-
-    <section id="controls" class="controls" aria-label="Ustawianie wskazówek" hidden>
-      <div class="control control--hours">
-        <p class="control__label">GODZINY</p>
-        <div class="control__buttons">
-          <button class="adjust" type="button" data-unit="hour" data-direction="-1" aria-label="Cofnij wskazówkę godzinową">−</button>
-          <output id="hour-value" class="control__value" aria-live="polite">12</output>
-          <button class="adjust" type="button" data-unit="hour" data-direction="1" aria-label="Przesuń wskazówkę godzinową">+</button>
-        </div>
-      </div>
-      <div class="control control--minutes">
-        <p class="control__label">MINUTY</p>
-        <div class="control__buttons">
-          <button class="adjust" type="button" data-unit="minute" data-direction="-1" aria-label="Cofnij wskazówkę minutową o 5 minut">−</button>
-          <output id="minute-value" class="control__value" aria-live="polite">00</output>
-          <button class="adjust" type="button" data-unit="minute" data-direction="1" aria-label="Przesuń wskazówkę minutową o 5 minut">+</button>
-        </div>
-      </div>
-    </section>
 
     <button id="check" class="check" type="button" hidden>Sprawdź</button>
 

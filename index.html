@@ -108,7 +108,6 @@
       </fieldset>
 
       <button id="check" class="check" type="button" hidden>Sprawdź</button>
-      <p id="success" class="success-panel" aria-live="polite" hidden></p>
     </div>
 
     <p id="feedback" class="feedback" aria-live="polite"></p>
@@ -117,6 +116,12 @@
 
     <noscript><p class="noscript">Ta strona potrzebuje włączonego JavaScriptu, aby losować zadania.</p></noscript>
   </main>
+
+  <div id="success-overlay" class="success-overlay" aria-live="polite" hidden>
+    <p id="success-message" class="success-overlay__message"></p>
+    <button id="next" class="check success-overlay__next" type="button">Następne zadanie</button>
+  </div>
+
   <script src="assets/clock.js"></script>
 </body>
 </html>

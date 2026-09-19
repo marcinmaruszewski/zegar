@@ -1,8 +1,6 @@
 (function (root) {
   "use strict";
 
-  var SUCCESS_DELAY = 5000;
-
   function normaliseHour(hour) {
     var value = hour % 24;
     if (value < 0) {
@@ -121,8 +119,7 @@
     adjustMinute: adjustMinute,
     adjustTimeByMinutes: adjustTimeByMinutes,
     startingTime: startingTime,
-    timesMatch: timesMatch,
-    successDelay: SUCCESS_DELAY
+    timesMatch: timesMatch
   };
 
   if (typeof module !== "undefined" && module.exports) {
@@ -146,7 +143,9 @@
     var hourControls = root.document.getElementById("hour-controls");
     var minuteControls = root.document.getElementById("minute-controls");
     var checkButton = root.document.getElementById("check");
-    var successPanel = root.document.getElementById("success");
+    var successOverlay = root.document.getElementById("success-overlay");
+    var successMessage = root.document.getElementById("success-message");
+    var nextButton = root.document.getElementById("next");
     var feedback = root.document.getElementById("feedback");
     var statsCorrect = root.document.getElementById("stats-correct");
     var statsErrors = root.document.getElementById("stats-errors");
@@ -154,7 +153,6 @@
     var mode = "read";
     var target = null;
     var setting = null;
-    var advanceTimer = null;
     var correctCount = 0;
     var errorCount = 0;
 
@@ -185,13 +183,11 @@
     function setFeedback(message, successful) {
       if (successful) {
         feedback.textContent = "";
-        successPanel.textContent = message;
-        successPanel.setAttribute("class", "success-panel success-panel--active");
-        successPanel.hidden = false;
+        successMessage.textContent = message;
+        successOverlay.hidden = false;
       } else {
-        successPanel.textContent = "";
-        successPanel.setAttribute("class", "success-panel");
-        successPanel.hidden = true;
+        successMessage.textContent = "";
+        successOverlay.hidden = true;
         feedback.textContent = message;
       }
     }
@@ -209,27 +205,11 @@
       setButtonsDisabled(minuteControls, disabled);
     }
 
-    function clearAdvanceTimer() {
-      if (advanceTimer !== null) {
-        root.clearTimeout(advanceTimer);
-        advanceTimer = null;
-      }
-    }
-
-    function scheduleNextMode() {
-      clearAdvanceTimer();
-      advanceTimer = root.setTimeout(function () {
-        advanceTimer = null;
-        showNextMode();
-      }, SUCCESS_DELAY);
-    }
-
     function renderReadExercise() {
       var choices;
       var buttons;
       var index;
 
-      clearAdvanceTimer();
       mode = "read";
       target = randomTime(Math.random);
       setting = null;
@@ -258,7 +238,6 @@
     }
 
     function renderSetExercise() {
-      clearAdvanceTimer();
       mode = "set";
       target = randomTime(Math.random);
       setting = startingTime(target);
@@ -294,7 +273,6 @@
         setFeedback("Dobrze! Zegar pokazuje " + correct + ".", true);
         setButtonsDisabled(answers, true);
         answers.hidden = true;
-        scheduleNextMode();
       } else {
         recordAttempt(false);
         setFeedback("Spróbuj jeszcze raz. Najpierw spójrz na długą wskazówkę.", false);
@@ -335,7 +313,6 @@
         setHandControlsDisabled(true);
         checkButton.disabled = true;
         checkButton.hidden = true;
-        scheduleNextMode();
       } else {
         recordAttempt(false);
         setFeedback("Jeszcze nie. Porównaj godziny i minuty, potem popraw wskazówki.", false);
@@ -354,6 +331,7 @@
     hourControls.addEventListener("click", adjustHands, false);
     minuteControls.addEventListener("click", adjustHands, false);
     checkButton.addEventListener("click", checkSetting, false);
+    nextButton.addEventListener("click", showNextMode, false);
     renderReadExercise();
   }
 

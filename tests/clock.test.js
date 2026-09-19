@@ -161,7 +161,3 @@ test("matching a time requires both hands to be correct", function () {
     true
   );
 });
-
-test("a successful answer stays visible for five seconds", function () {
-  assert.equal(clock.successDelay, 5000);
-});

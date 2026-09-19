@@ -156,6 +156,10 @@ test("matching a time requires both hands to be correct", function () {
     clock.timesMatch({ hour: 7, minute: 35 }, { hour: 7, minute: 40 }),
     false
   );
+  assert.equal(
+    clock.timesMatch({ hour: 22, minute: 38 }, { hour: 10, minute: 38 }),
+    true
+  );
 });
 
 test("a successful answer stays visible for five seconds", function () {

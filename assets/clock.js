@@ -106,7 +106,7 @@
   }
 
   function timesMatch(first, second) {
-    return normaliseHour(first.hour) === normaliseHour(second.hour) &&
+    return normaliseHour(first.hour) % 12 === normaliseHour(second.hour) % 12 &&
       first.minute === second.minute;
   }
 

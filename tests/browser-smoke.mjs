@@ -181,10 +181,11 @@ assert.match(wrongResult.feedback, /^Jeszcze nie\./);
 assert.equal(wrongResult.actionTop, settingState.actionTop);
 
 const correctSetting = await evaluate(`(function () {
+  var i;
   document.querySelector('[data-unit="hour"][data-direction="-1"]').click();
-  document.querySelector('[data-unit="minute"][data-direction="-1"]').click();
-  document.querySelector('[data-unit="minute"][data-direction="-1"]').click();
-  document.querySelector('[data-unit="minute"][data-direction="-1"]').click();
+  for (i = 0; i < 15; i += 1) {
+    document.querySelector('[data-unit="minute"][data-direction="-1"]').click();
+  }
   document.getElementById("check").click();
   var success = document.getElementById("success");
   return JSON.stringify({

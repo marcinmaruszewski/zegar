@@ -4,11 +4,11 @@
   var SUCCESS_DELAY = 5000;
 
   function normaliseHour(hour) {
-    var value = hour % 12;
+    var value = hour % 24;
     if (value < 0) {
-      value += 12;
+      value += 24;
     }
-    return value === 0 ? 12 : value;
+    return value;
   }
 
   function minuteAngle(minute) {
@@ -28,24 +28,24 @@
     return pad2(normaliseHour(hour)) + ":" + pad2(minute);
   }
 
-  function answerChoices(hour, minute) {
-    var candidates = [
+  var MIN_CHOICE_GAP_MINUTES = 90;
+  var CHOICE_SPREAD_MINUTES = 300;
+
+  function offsetTime(hour, minute, deltaMinutes) {
+    var total = normaliseHour(hour) * 60 + minute + deltaMinutes;
+    total = ((total % 1440) + 1440) % 1440;
+    return formatTime(Math.floor(total / 60), total % 60);
+  }
+
+  function answerChoices(hour, minute, random) {
+    var deltaA = MIN_CHOICE_GAP_MINUTES + Math.floor(random() * CHOICE_SPREAD_MINUTES);
+    var deltaB = -MIN_CHOICE_GAP_MINUTES - Math.floor(random() * CHOICE_SPREAD_MINUTES);
+
+    return [
       formatTime(hour, minute),
-      formatTime(hour + 1, minute),
-      formatTime(hour, (minute + 30) % 60),
-      formatTime(hour - 1, minute),
-      formatTime(hour, (minute + 15) % 60)
+      offsetTime(hour, minute, deltaA),
+      offsetTime(hour, minute, deltaB)
     ];
-    var unique = [];
-    var index;
-
-    for (index = 0; index < candidates.length && unique.length < 3; index += 1) {
-      if (unique.indexOf(candidates[index]) === -1) {
-        unique.push(candidates[index]);
-      }
-    }
-
-    return unique;
   }
 
   function shuffle(values, random) {
@@ -65,8 +65,8 @@
 
   function randomTime(random) {
     return {
-      hour: Math.floor(random() * 12) + 1,
-      minute: Math.floor(random() * 12) * 5
+      hour: Math.floor(random() * 24),
+      minute: Math.floor(random() * 60)
     };
   }
 
@@ -75,11 +75,11 @@
   }
 
   function adjustMinute(minute, direction) {
-    var slot = (minute / 5 + direction) % 12;
-    if (slot < 0) {
-      slot += 12;
+    var value = (minute + direction) % 60;
+    if (value < 0) {
+      value += 60;
     }
-    return slot * 5;
+    return value;
   }
 
   function adjustTimeByMinutes(time, direction) {
@@ -101,7 +101,7 @@
   function startingTime(target) {
     return {
       hour: adjustHour(target.hour, 1),
-      minute: adjustMinute(target.minute, 3)
+      minute: adjustMinute(target.minute, 15)
     };
   }
 
@@ -244,7 +244,7 @@
       answers.hidden = false;
       setFeedback("", false);
 
-      choices = shuffle(answerChoices(target.hour, target.minute), Math.random);
+      choices = shuffle(answerChoices(target.hour, target.minute, Math.random), Math.random);
       buttons = answers.getElementsByTagName("button");
       for (index = 0; index < buttons.length; index += 1) {
         buttons[index].textContent = choices[index];
